@@ -1,49 +1,43 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
+
 metadata:
-  name: inventory-service-prod
+  name: auth-service-dev
   namespace: argocd
-  labels:
-    env: prod
-    app: inventory-service
-    managed-by: terraform
+
   finalizers:
     - resources-finalizer.argocd.argoproj.io
+
 spec:
   project: pharma
 
   source:
-    repoURL: https://github.com/DPP-2026/zen-gitops.git
+    repoURL: https://github.com/sravs994/zen-gitops-lab1.git
     targetRevision: HEAD
     path: helm-charts
+
     helm:
       valueFiles:
-        - ../envs/prod/values-inventory-service.yaml
+        - ../envs/dev/values-auth-service.yaml
 
   destination:
     server: https://kubernetes.default.svc
-    namespace: prod
+    namespace: dev
 
   syncPolicy:
     automated:
       prune: true
-      selfHeal: true
       allowEmpty: false
+
     syncOptions:
       - CreateNamespace=true
       - PrunePropagationPolicy=foreground
       - PruneLast=true
+
     retry:
       limit: 5
+
       backoff:
         duration: 5s
         factor: 2
         maxDuration: 3m
-
-  ignoreDifferences:
-    - group: apps
-      kind: Deployment
-      jsonPointers:
-        - /spec/replicas
-
-  revisionHistoryLimit: 10
